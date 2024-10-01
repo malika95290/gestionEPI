@@ -1,3 +1,9 @@
+-- Création de la base de données gestionEPI
+CREATE DATABASE gestionEPI;
+
+-- Utilisation de la base de données gestionEPI
+USE gestionEPI;
+
 -- Création de la table epiTypes
 CREATE TABLE epiTypes (
     id INT PRIMARY KEY AUTO_INCREMENT,
