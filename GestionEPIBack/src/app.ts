@@ -3,6 +3,9 @@ import express from "express";
 import cors from "cors";
 import * as middlewares from "./middlewares";
 
+import epiController from "./pages/epiController";
+// import controleController from "./pages/controleController";
+
 require("dotenv").config();
 
 //********** Server **********//
@@ -17,6 +20,10 @@ const app = express();
 app.use(cors(options));
 // Middleware to parse json throught requests.
 app.use(express.json());
+
+//Routes de l'API
+app.use('/api/epis', epiController);
+// app.use('/api/controles/', controleController)
 
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
