@@ -1,0 +1,19 @@
+{
+  "name": "gestepiinterfaces",
+  "version": "1.0.0",
+  "description": "Interfaces TypeScript partagées pour le projet GestEPI ",
+  "main": "dist/index.js",
+  "types": "dist/types.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "Malika Amrani",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

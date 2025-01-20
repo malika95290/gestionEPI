@@ -1,7 +1,7 @@
 export enum UserTypes{
-    ADMIN = 'admin', //GERER LES UTILISATEURS
-    MANAGER = 'manager', //MODIFIER ET LIRE
-    USER = 'user' //LIRE
+    ADMIN = 'admin',
+    MANAGER = 'manager', 
+    USER = 'user'
 }
 
 export enum CheckStatus {
