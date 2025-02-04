@@ -20,6 +20,13 @@ DELETE api/controles/:id : ok
 - Ajouter un contrôle :
 POST api/controles/:id : ok
 
+USER :
+all : OK
+byId : OK
+delete : erreur
+put (MAJ) : ok
+post (add) : ok
+
 ALERTES :
 GET api/alert
 
