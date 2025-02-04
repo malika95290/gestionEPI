@@ -23,14 +23,10 @@ POST api/controles/:id : ok
 USER :
 all : OK
 byId : OK
-delete : erreur
+delete : OK
 put (MAJ) : ok
 post (add) : ok
 
-ALERTES :
-GET api/alert
 
-LOGIN :
-POST /api/login
 
 model > manager > controller
