@@ -14,9 +14,9 @@ CONTROLES
 - Voir les controles :
 GET api/controles/:id : ok
 - By id : OK
-- MAJ : erreur
+- MAJ : ok
 - Supprimer les controles
-DELETE api/controles/:id : erreur 
+DELETE api/controles/:id : ok 
 - Ajouter un contrôle :
 POST api/controles/:id : ok
 
