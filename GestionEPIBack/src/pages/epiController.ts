@@ -5,6 +5,7 @@ import { EPI } from "gestepiinterfaces";
 import {
   handleGetAllEpis,
   handleGetEpiById,
+  handlePutEPI
 } from "../managers/epiManager";
 
 const router = express.Router();
@@ -45,4 +46,17 @@ async (
 }
 );
 
+// Route de mise à jour d'un EPI
+router.put("/", async (request: Request, response: Response<JSON>, next: NextFunction) => {
+    try {
+      const updatedEPI = await handlePutEPI(request, next); 
+  
+      if (!updatedEPI) return;
+  
+      response.status(200).json(updatedEPI); 
+    } catch (error) {
+      next(error);
+    }
+  });
+  
 export default router;
