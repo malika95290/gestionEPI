@@ -92,4 +92,33 @@ export const handleDeleteEPI = async (request: Request, next: NextFunction) => {
       next(error); // Passe l'erreur pour qu'elle soit gérée
   }
 };
-
+export const handlePostEPI = async (request: Request, next: NextFunction) => {
+  // Vérification des champs obligatoires
+  const body = request.body;
+  
+  if (!body.idInterne || !body.idCheck || !body.idTypes || !body.numeroDeSerie || 
+      !body.dateAchat || !body.dateFabrication || !body.dateMiseEnService || 
+      !body.frequenceControle) {
+      throw new Error("Tous les champs obligatoires doivent être fournis.");
+  }
+  
+  // Préparation de l'objet EPI
+  const epi: EPI = {
+      idInterne: body.idInterne,
+      idCheck: body.idCheck,
+      idTypes: body.idTypes,
+      numeroDeSerie: body.numeroDeSerie,
+      dateAchat: body.dateAchat,
+      dateFabrication: body.dateFabrication,
+      dateMiseEnService: body.dateMiseEnService,
+      frequenceControle: body.frequenceControle,
+      marque: body.marque,
+      model: body.model,
+      taille: body.taille,
+      couleur: body.couleur,
+      id: 0
+  };
+  
+  // Ajouter l'EPI en base de données via le modèle
+  return await epiModel.addOne(epi);
+};

@@ -104,5 +104,63 @@ export const epiModel = {
         if (connection) connection.release(); // Libérer la connexion
       }
     },
+
+    addOne: async (epi: {
+      idInterne: number;
+      idCheck: number;
+      idTypes: number;
+      numeroDeSerie: number;
+      dateAchat: Date;
+      dateFabrication: Date;
+      dateMiseEnService: Date;
+      frequenceControle: string;
+      marque?: string;
+      model?: string;
+      taille?: string;
+      couleur?: string;
+  }) => {
+      let connection;
+      try {
+          // Validation des champs requis
+          if (!epi.idInterne || !epi.idCheck || !epi.idTypes || !epi.numeroDeSerie || !epi.dateAchat || !epi.dateFabrication || !epi.dateMiseEnService || !epi.frequenceControle) {
+              throw new Error("AUCUN EPI AJOUTE ? Peut-être manque-t-il des données ?");
+          }
+  
+          connection = await pool.getConnection();
+  
+          // Requête d'insertion des données dans la base
+          const result = await connection.query(
+              `INSERT INTO epi (idInterne, idCheck, idTypes, numeroDeSerie, dateAchat, dateFabrication, dateMiseEnService, frequenceControle, marque, model, taille, couleur) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+              [
+                  epi.idInterne, epi.idCheck, epi.idTypes, epi.numeroDeSerie, 
+                  epi.dateAchat, epi.dateFabrication, epi.dateMiseEnService, epi.frequenceControle,
+                  epi.marque, epi.model, epi.taille, epi.couleur
+              ] // Utilisation des paramètres pour éviter les injections SQL
+          );
+  
+          // Vérification si l'insertion a réussi
+          if (result.affectedRows === 0) {
+              throw new Error("AUCUN EPI AJOUTE");
+          }
+          
+          return {
+            ...epi,
+            id: Number(result.insertId),
+        };
+  
+      } catch (error) {
+          if (error instanceof Error) {
+              throw new Error(error.message || "AUCUN EPI AJOUTE ? Peut-être manque-t-il des données ?");
+          } else {
+              throw new Error("Une erreur inconnue est survenue.");
+          }
+      } finally {
+          if (connection) connection.release(); // Libérer la connexion
+      }
+  },
+  
+  
+  
         
 }
