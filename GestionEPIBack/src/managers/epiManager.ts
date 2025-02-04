@@ -73,3 +73,23 @@ export const handlePutEPI = async (request: Request, next: NextFunction) => {
     next(error); // Propagation de l'erreur au middleware d'erreur
   }
 };
+
+//Suppresion d'un EPI
+export const handleDeleteEPI = async (request: Request, next: NextFunction) => {
+  try {
+      const id = parseInt(request.params.id); // Récupérer l'ID depuis les paramètres
+      if (!id) {
+          throw new Error("ID de l'EPI manquant ou invalide.");
+      }
+
+      const results = await epiModel.delete(id);
+      if (results.affectedRows === 0) {
+          throw new Error("Erreur : aucun EPI supprimé (ID introuvable).");
+      }
+
+      return { message: `L'EPI ayant l'id : ${id} a été supprimé.` }; // Message de succès
+  } catch (error) {
+      next(error); // Passe l'erreur pour qu'elle soit gérée
+  }
+};
+

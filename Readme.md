@@ -4,9 +4,9 @@ EPI
 - Voir tous les epis :
 GET api/epis : OK
 - Modifier les epis :
-PUT api/epis/:id
+PUT api/epis/:id : OK
 - supprimer les epis :
-DELETE api/epis/:id
+DELETE api/epis/:id : OK
 - Ajouter un epi :
 POST api/epis/:id/epi
 

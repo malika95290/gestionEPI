@@ -84,8 +84,25 @@ export const epiModel = {
         } finally {
             if (connection) connection.release();
         }
-    }
+    },
+
+    delete: async (id: number) => {
+      let connection;
+      try {
+        connection = await pool.getConnection(); // Obtenir une connexion
+        const rows = await pool.query(
+          `DELETE FROM epi WHERE id = ?`, [id] // Utilisation des placeholders pour éviter les injections SQL
+        );
     
-    
-    
+        if (rows.affectedRows === 0) {
+          throw new Error(`AUCUN EPI SUPPRIME - Peut-être que l'id n'existe pas en BDD.`);
+        }
+        return rows;
+      } catch (error) {
+        throw new Error(`AUCUN EPI SUPPRIME - Peut-être que l'id n'existe pas en BDD.`);
+      } finally {
+        if (connection) connection.release(); // Libérer la connexion
+      }
+    },
+        
 }

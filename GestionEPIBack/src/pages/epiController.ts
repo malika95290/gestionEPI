@@ -5,7 +5,8 @@ import { EPI } from "gestepiinterfaces";
 import {
   handleGetAllEpis,
   handleGetEpiById,
-  handlePutEPI
+  handlePutEPI,
+  handleDeleteEPI
 } from "../managers/epiManager";
 
 const router = express.Router();
@@ -59,4 +60,14 @@ router.put("/", async (request: Request, response: Response<JSON>, next: NextFun
     }
   });
   
+// Supprimer un EPI par ID
+router.delete("/:id", async (request: Request, response: Response, next: NextFunction) => {
+    try {
+        const result = await handleDeleteEPI(request, next);
+        response.status(200).json(result); // Retourne le message de succès
+    } catch (error) {
+        next(error); // Passe l'erreur au middleware de gestion des erreurs
+    }
+});
+
 export default router;
