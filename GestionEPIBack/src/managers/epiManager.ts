@@ -17,6 +17,33 @@ export const handleGetAllEpis = async (request: Request, next: NextFunction): Pr
 export const handleGetEpiById = async (id:string, next: NextFunction) => {
   return (await epiModel.getById(id)) satisfies EPI[];
 };
+
+export const handleGetEPIsByFilters = async (
+  params: Record<string, string | number | Date | undefined>,
+  next: NextFunction
+) => {
+  try {
+    const filteredParams: Record<string, string | number | Date> = {};
+    
+    if (params.id) filteredParams["id"] = parseInt(params.id as string, 10);
+    if (params.idInterne) filteredParams["idInterne"] = parseInt(params.idInterne as string, 10);
+    if (params.numeroDeSerie) filteredParams["numeroDeSerie"] = parseInt(params.numeroDeSerie as string, 10);
+    if (params.marque) filteredParams["marque"] = params.marque.toString().trim();
+    if (params.model) filteredParams["model"] = params.model.toString().trim();
+    if (params.idTypes) filteredParams["idTypes"] = parseInt(params.idTypes as string, 10);
+    if (params.taille) filteredParams["taille"] = params.taille.toString().trim();
+    if (params.couleur) filteredParams["couleur"] = params.couleur.toString().trim();
+    if (params.dateAchat) filteredParams["dateAchat"] = new Date(params.dateAchat as string);
+    if (params.dateFabrication) filteredParams["dateFabrication"] = new Date(params.dateFabrication as string);
+    if (params.dateMiseEnService) filteredParams["dateMiseEnService"] = new Date(params.dateMiseEnService as string);
+    if (params.frequenceControle) filteredParams["frequenceControle"] = params.frequenceControle.toString().trim();
+    if (params.idCheck) filteredParams["idCheck"] = parseInt(params.idCheck as string, 10);
+    
+    return (await epiModel.getWithFilters(filteredParams)) satisfies EPI[];
+  } catch (error) {
+    next(error);
+  }
+};
   
 // Fonction de gestion de la mise à jour d'un EPI
 export const handlePutEPI = async (request: Request, next: NextFunction) => {

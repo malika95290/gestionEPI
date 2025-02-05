@@ -5,6 +5,7 @@ import { EPI } from "gestepiinterfaces";
 import {
   handleGetAllEpis,
   handleGetEpiById,
+  handleGetEPIsByFilters,
   handlePutEPI,
   handleDeleteEPI,
   handlePostEPI
@@ -14,6 +15,25 @@ const router = express.Router();
 //********** Routes **********//
 
 // READ MIDDLEWARE
+
+// Voir avec les filtres 
+
+router.get(
+    "/filtres",
+    async (
+      request: Request,
+      response: Response<EPI[] | string>,
+      next: NextFunction
+    ) => {
+      try {
+        const params = request.query as Record<string, string | number | Date | undefined>;
+        const results = await handleGetEPIsByFilters(params, next);
+        response.status(200).json(results);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
 // Voir tous les epis
 router.get(
