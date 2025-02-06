@@ -42,6 +42,39 @@ export const epiCheckModel = {
         }
       },
 
+      getWithFilters: async (params: Record<string, string | number | Date>) => {
+        let connection;
+        try {
+          connection = await pool.getConnection();
+          
+          let query = "SELECT * FROM epiCheck WHERE ";
+          const values: (string | number | Date)[] = [];
+          const keys = Object.keys(params);
+          
+          if (keys.length === 0) {
+            query = "SELECT * FROM epiCheck";
+          } else {
+            keys.forEach((key, index) => {
+              query += `${key} = ?`;
+              values.push(params[key]);
+              if (index !== keys.length - 1) query += " AND ";
+            });
+          }
+          
+          const rows = await connection.query(query, values);
+          
+          if (rows.length === 0) {
+            throw new Error(`AUCUN CONTROLE TROUVÉ - AVEC LES FILTRES DONNÉS ${JSON.stringify(params)}`);
+          }
+          
+          return rows;
+        } catch (error) {
+          throw new Error(`AUCUN CONTROLE TROUVÉ - AVEC LES FILTRES DONNÉS ${JSON.stringify(params)}`);
+        } finally {
+          if (connection) connection.release();
+        }
+      },
+
       update: async (params: Record<string, string | number | Date | undefined>) => {
         let connection;
         try {

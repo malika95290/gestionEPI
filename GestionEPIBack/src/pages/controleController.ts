@@ -5,6 +5,7 @@ import { epiCheck } from "gestepiinterfaces";
 import {
   handleGetAllEpiChecks,
   handleGetEpiCheckById,
+  handleGetEpiChecksByFilters,
   handlePutEpiCheck,
   handleDeleteEpiCheck,
   handlePostEpiCheck
@@ -14,6 +15,25 @@ const router = express.Router();
 //********** Routes **********//
 
 // READ MIDDLEWARE
+
+// Voir les filtres
+
+router.get(
+  "/filtres",
+  async (
+    request: Request,
+    response: Response<epiCheck[] | string>,
+    next: NextFunction
+  ) => {
+    try {
+      const params = request.query as Record<string, string | number | Date | undefined>;
+      const results = await handleGetEpiChecksByFilters(params, next);
+      response.status(200).json(results);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 // Voir tous les EPI Checks
 router.get(

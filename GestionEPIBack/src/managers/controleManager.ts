@@ -18,6 +18,26 @@ export const handleGetEpiCheckById = async (id: string, next: NextFunction) => {
   return (await epiCheckModel.getById(id)) satisfies epiCheck[];
 };
 
+export const handleGetEpiChecksByFilters = async (
+  params: Record<string, string | number | Date | undefined>,
+  next: NextFunction
+) => {
+  try {
+    const filteredParams: Record<string, string | number | Date> = {};
+    
+    if (params.id) filteredParams["id"] = parseInt(params.id as string, 10);
+    if (params.idStatus) filteredParams["idStatus"] = parseInt(params.idStatus as string, 10);
+    if (params.idGestionnaire) filteredParams["idGestionnaire"] = parseInt(params.idGestionnaire as string, 10);
+    if (params.idEPI) filteredParams["idEPI"] = parseInt(params.idEPI as string, 10);
+    if (params.dateControle) filteredParams["dateControle"] = new Date(params.dateControle as string);
+    if (params.remarque) filteredParams["remarque"] = params.remarque.toString().trim();
+    
+    return (await epiCheckModel.getWithFilters(filteredParams)) satisfies epiCheck[];
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Fonction de gestion de la mise à jour d'un EPI Check
 export const handlePutEpiCheck = async (request: Request, next: NextFunction) => {
   try {
