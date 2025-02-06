@@ -27,6 +27,17 @@ delete : OK
 put (MAJ) : ok
 post (add) : ok
 
-
-
 model > manager > controller
+
+Gestionnaire EPI et Cordiste :
+- Se connecter au système
+- Consulter la liste des EPI
+- Consulter la liste des contrôles
+
+Le gestionnaire peut en plus :
+- Enregistrer un nouvel EPI
+- Enregistrer un contrôle d'EPI
+- Etre alerté des contrôles à venir
+
+Back 
+npm install --save-dev @types/jsonwebtoken : gestion des tokens

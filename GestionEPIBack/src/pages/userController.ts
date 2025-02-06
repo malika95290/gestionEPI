@@ -8,7 +8,8 @@ import {
   handleGetUsersByFilters,
   handlePutUser,
   handleDeleteUser,
-  handlePostUser
+  handlePostUser,
+  handleLogin
 } from "../managers/userManager";
 
 const router = express.Router();
@@ -102,6 +103,22 @@ router.post("/",
     try {
       const newUser = await handlePostUser(request, next);
       response.status(201).json(newUser);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  "/login",
+  async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const result = await handleLogin(request, next);
+      response.status(200).json(result);
     } catch (error) {
       next(error);
     }

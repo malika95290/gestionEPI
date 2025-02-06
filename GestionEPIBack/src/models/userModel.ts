@@ -134,30 +134,30 @@ export const usersModel = {
       }
     },
 
-    addOne: async (user: {
+    addOne : async (user: {
       idUserTypes: number;
       nom: string;
       prenom: string;
       mdp: string;
-  }) => {
+      }) => {
       let connection;
       try {
           // Validation des champs requis
           if (!user.idUserTypes || !user.nom || !user.prenom || !user.mdp) {
               throw new Error("AUCUN UTILISATEUR AJOUTE ? Peut-être manque-t-il des données ?");
           }
-  
+
           connection = await pool.getConnection();
-  
+
           // Requête d'insertion des données dans la base
           const result = await connection.query(
               `INSERT INTO users (idUserTypes, nom, prenom, mdp) 
               VALUES (?, ?, ?, ?);`,
               [
                   user.idUserTypes, user.nom, user.prenom, user.mdp
-              ] // Utilisation des paramètres pour éviter les injections SQL
+              ]
           );
-  
+
           // Vérification si l'insertion a réussi
           if (result.affectedRows === 0) {
               throw new Error("AUCUN UTILISATEUR AJOUTE");
@@ -167,7 +167,7 @@ export const usersModel = {
             ...user,
             id: Number(result.insertId),
         };
-  
+
       } catch (error) {
           if (error instanceof Error) {
               throw new Error(error.message || "AUCUN UTILISATEUR AJOUTE ? Peut-être manque-t-il des données ?");
@@ -177,5 +177,27 @@ export const usersModel = {
       } finally {
           if (connection) connection.release(); // Libérer la connexion
       }
-  },
+    },
+
+    findByCredentials: async (nom: string, prenom: string, mdp: string) => {
+      let connection;
+      try {
+        connection = await pool.getConnection();
+        const rows = await connection.query(
+          'SELECT * FROM users WHERE nom = ? AND prenom = ?',
+          [nom, prenom]
+        );
+    
+        if (rows.length === 0) {
+          throw new Error('Invalid credentials');
+        }
+    
+        return rows[0];
+      } catch (error) {
+        throw new Error('Error during login process');
+      } finally {
+        if (connection) connection.release();
+      }
+    }
+    
 }

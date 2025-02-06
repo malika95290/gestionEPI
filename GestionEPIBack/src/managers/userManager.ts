@@ -1,6 +1,8 @@
 import { NextFunction, Request } from "express";
 import { USERS } from "gestepiinterfaces";
 import { usersModel } from "../models/userModel";
+import bcrypt from 'bcrypt';
+import jwt from "jsonwebtoken";
 
 // Récupérer tous les utilisateurs
 export const handleGetAllUsers = async (request: Request, next: NextFunction): Promise<USERS[]> => {
@@ -105,16 +107,72 @@ export const handlePostUser = async (request: Request, next: NextFunction) => {
   if (!body.idUserTypes || !body.nom || !body.prenom || !body.mdp) {
       throw new Error("Tous les champs obligatoires doivent être fournis.");
   }
+
+  // Hachage du mot de passe
+  const saltRounds = 10;  // Nombre de tours pour le hachage
+  const hashedPassword = await bcrypt.hash(body.mdp, saltRounds);
   
-  // Préparation de l'objet utilisateur
+  // Préparation de l'objet utilisateur avec mot de passe haché
   const user: USERS = {
       idUserTypes: body.idUserTypes,
       nom: body.nom,
       prenom: body.prenom,
-      mdp: body.mdp,
+      mdp: hashedPassword,  // Utilisation du mot de passe haché
       id: 0 // ID est généré automatiquement par la base de données
   };
   
   // Ajouter l'utilisateur en base de données via le modèle
   return await usersModel.addOne(user);
 };
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // Use environment variable in production
+
+export const handleLogin = async (request: Request, next: NextFunction) => {
+  try {
+    const { nom, prenom, mdp } = request.body;
+    console.log(nom, prenom, mdp);
+    
+    // Validate input
+    if (!nom || !prenom || !mdp) {
+      throw new Error('Nom, prénom et mot de passe sont requis');
+    }
+
+    // Find user by credentials
+    const user = await usersModel.findByCredentials(nom, prenom, mdp);
+
+    console.log(user);
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(mdp, user.mdp);
+    console.log(isPasswordValid);
+    
+    if (!isPasswordValid) {
+      throw new Error('Invalid credentials');
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        userId: user.id,
+        userType: user.idUserTypes 
+      },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    // Return user info and token
+    return {
+      user: {
+        id: user.id,
+        nom: user.nom,
+        prenom: user.prenom,
+        idUserTypes: user.idUserTypes
+      },
+      token
+    };
+  } catch (error) {
+    next(error);
+    throw new Error('Login failed');
+  }
+};
+
