@@ -18,6 +18,26 @@ export const handleGetUserById = async (id: string, next: NextFunction) => {
   return (await usersModel.getById(id)) satisfies USERS[];
 };
 
+export const handleGetUsersByFilters = async (
+  params: Record<string, string | number | undefined>,
+  next: NextFunction
+) => {
+  try {
+    const filteredParams: Record<string, string | number> = {};
+
+    if (params.id) filteredParams["id"] = parseInt(params.id as string, 10);
+    if (params.idUserTypes) filteredParams["idUserTypes"] = parseInt(params.idUserTypes as string, 10);
+    if (params.nom) filteredParams["nom"] = params.nom.toString().trim();
+    if (params.prenom) filteredParams["prenom"] = params.prenom.toString().trim();
+    if (params.mdp) filteredParams["mdp"] = params.mdp.toString().trim();
+
+    return (await usersModel.getWithFilters(filteredParams)) satisfies USERS[];
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 // Fonction de gestion de la mise à jour d'un utilisateur
 export const handlePutUser = async (request: Request, next: NextFunction) => {
   try {

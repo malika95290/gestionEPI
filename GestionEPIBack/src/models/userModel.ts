@@ -41,6 +41,39 @@ export const usersModel = {
         }
       },
 
+      getWithFilters: async (params: Record<string, string | number>) => {
+        let connection;
+        try {
+          connection = await pool.getConnection();
+    
+          let query = "SELECT * FROM USERS WHERE ";
+          const values: (string | number)[] = [];
+          const keys = Object.keys(params);
+    
+          if (keys.length === 0) {
+            query = "SELECT * FROM USERS";
+          } else {
+            keys.forEach((key, index) => {
+              query += `${key} = ?`;
+              values.push(params[key]);
+              if (index !== keys.length - 1) query += " AND ";
+            });
+          }
+    
+          const rows = await connection.query(query, values);
+    
+          if (rows.length === 0) {
+            throw new Error(`AUCUN UTILISATEUR TROUVÉ - FILTRES: ${JSON.stringify(params)}`);
+          }
+    
+          return rows;
+        } catch (error) {
+          throw new Error(`AUCUN UTILISATEUR TROUVÉ - FILTRES: ${JSON.stringify(params)}`);
+        } finally {
+          if (connection) connection.release();
+        }
+      },
+
       update: async (params: Record<string, string | number | Date | undefined>) => {
         let connection;
         try {

@@ -5,6 +5,7 @@ import { USERS } from "gestepiinterfaces";
 import {
   handleGetAllUsers,
   handleGetUserById,
+  handleGetUsersByFilters,
   handlePutUser,
   handleDeleteUser,
   handlePostUser
@@ -14,6 +15,25 @@ const router = express.Router();
 //********** Routes **********//
 
 // READ MIDDLEWARE
+
+// Voir les utilisateurs par filtre
+
+router.get(
+  "/filtres",
+  async (
+    request: Request,
+    response: Response<USERS[] | string>,
+    next: NextFunction
+  ) => {
+    try {
+      const params = request.query as Record<string, string | number | undefined>;
+      const results = await handleGetUsersByFilters(params, next);
+      response.status(200).json(results);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 // Voir tous les utilisateurs
 router.get(
