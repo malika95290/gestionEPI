@@ -1,0 +1,52 @@
+/* Tableau des EPIs */
+.table-container {
+overflow-x: auto;
+}
+
+table {
+width: 100%;
+border-collapse: collapse;
+background: white;
+}
+
+thead {
+background-color: #f0f0f0;
+}
+
+th, td {
+padding: 10px;
+border-bottom: 1px solid #ddd;
+text-align: left;
+}
+
+tr:hover {
+background-color: #f9f9f9;
+}
+
+/* Boutons d'action */
+.edit-button {
+background-color: #ffc107;
+color: white;
+border: none;
+padding: 5px 10px;
+border-radius: 4px;
+cursor: pointer;
+margin-right: 5px;
+}
+
+.edit-button:hover {
+background-color: #e0a800;
+}
+
+.delete-button {
+background-color: #dc3545;
+color: white;
+border: none;
+padding: 5px 10px;
+border-radius: 4px;
+cursor: pointer;
+}
+
+.delete-button:hover {
+background-color: #c82333;
+}

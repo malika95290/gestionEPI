@@ -1,25 +1,24 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { Sidebar } from '../components/layout/Sidebar';
+import { EPIList } from '../components/epi/epiList'
+import '../styles/dashboard.css'; 
 
-export default function Dashboard() {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("token"); // Supprime le token
-    navigate("/"); // Redirige vers la page de connexion
-  };
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/");
-    }
-  }, [navigate]);
+const Dashboard: React.FC = () => {
+  const [activeItem, setActiveItem] = useState('epi');
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <h1 className="text-2xl">Bienvenue sur votre tableau de bord !</h1>
-      <button onClick={handleLogout}>Se déconnecter</button>
-    </div>  
+    <div className="dashboard-container">
+      <Sidebar activeItem={activeItem} setActiveItem={setActiveItem} />
+      <main className="dashboard-main">
+        <h1>{activeItem === 'epi' ? 'Liste des EPIs' : 'Liste des contrôles'}</h1>
+        {activeItem === 'epi' ? (
+          <EPIList />
+        ) : (
+          <div className="placeholder-box">Liste des contrôles (à implémenter)</div>
+        )}
+      </main>
+    </div>
   );
-}
+};
+
+export default Dashboard;

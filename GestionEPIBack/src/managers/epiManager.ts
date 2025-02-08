@@ -123,10 +123,10 @@ export const handlePostEPI = async (request: Request, next: NextFunction) => {
   // Vérification des champs obligatoires
   const body = request.body;
   
-  if (!body.idInterne || !body.idCheck || !body.idTypes || !body.numeroDeSerie || 
+  if (!body.idInterne || !body.idTypes || !body.numeroDeSerie || 
       !body.dateAchat || !body.dateFabrication || !body.dateMiseEnService || 
       !body.frequenceControle) {
-      throw new Error("Tous les champs obligatoires doivent être fournis.");
+      throw new Error("Les champs obligatoires doivent être fournis.");
   }
   
   // Préparation de l'objet EPI

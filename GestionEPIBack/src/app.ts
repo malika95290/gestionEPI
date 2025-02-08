@@ -6,6 +6,7 @@ import * as middlewares from "./middlewares";
 import epiController from "./pages/epiController";
 import controleController from "./pages/controleController";
 import userController from "./pages/userController";
+import epiTypesController from "./pages/epiTypesController";
 // import controleController from "./pages/controleController";
 
 require("dotenv").config();
@@ -25,6 +26,7 @@ app.use(express.json());
 
 //Routes de l'API
 app.use('/api/epis', epiController);
+app.use('/api/epi-types', epiTypesController);
 app.use('/api/controles/', controleController)
 app.use('/api/users/', userController)
 

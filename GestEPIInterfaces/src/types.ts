@@ -31,7 +31,7 @@ export interface USERS{
 export interface EPI{
     id:number,
     idInterne:number,
-    idCheck:number,
+    idCheck?:number,
     idTypes:number,
     marque?:string,
     model?:string,

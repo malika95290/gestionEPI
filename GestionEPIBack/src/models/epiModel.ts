@@ -155,7 +155,7 @@ export const epiModel = {
       let connection;
       try {
           // Validation des champs requis
-          if (!epi.idInterne || !epi.idCheck || !epi.idTypes || !epi.numeroDeSerie || !epi.dateAchat || !epi.dateFabrication || !epi.dateMiseEnService || !epi.frequenceControle) {
+          if (!epi.idInterne || !epi.idTypes || !epi.numeroDeSerie || !epi.dateAchat || !epi.dateFabrication || !epi.dateMiseEnService || !epi.frequenceControle) {
               throw new Error("AUCUN EPI AJOUTE ? Peut-être manque-t-il des données ?");
           }
   
@@ -166,7 +166,7 @@ export const epiModel = {
               `INSERT INTO epi (idInterne, idCheck, idTypes, numeroDeSerie, dateAchat, dateFabrication, dateMiseEnService, frequenceControle, marque, model, taille, couleur) 
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
               [
-                  epi.idInterne, epi.idCheck, epi.idTypes, epi.numeroDeSerie, 
+                  epi.idInterne, epi.idCheck || null, epi.idTypes, epi.numeroDeSerie, 
                   epi.dateAchat, epi.dateFabrication, epi.dateMiseEnService, epi.frequenceControle,
                   epi.marque, epi.model, epi.taille, epi.couleur
               ] // Utilisation des paramètres pour éviter les injections SQL
