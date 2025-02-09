@@ -54,14 +54,14 @@ router.get(
   );
 
 router.get(
-"/:immatriculation",
+"/:id",
 async (
     request: Request,
     response: Response<EPI[] | string>,
     next: NextFunction
 ) => {
     try {
-    const immat = request.params.immatriculation
+    const immat = request.params.id
     response.status(200).json(await handleGetEpiById(immat, next));
     } catch (error) {
     next(error);
@@ -70,17 +70,16 @@ async (
 );
 
 // Route de mise à jour d'un EPI
-router.put("/", async (request: Request, response: Response<JSON>, next: NextFunction) => {
-    try {
-      const updatedEPI = await handlePutEPI(request, next); 
-  
-      if (!updatedEPI) return;
-  
-      response.status(200).json(updatedEPI); 
-    } catch (error) {
-      next(error);
-    }
-  });
+router.put("/", async (request: Request, response: Response<EPI>, next: NextFunction) => {
+  try {
+    const updatedEPI = await handlePutEPI(request, next); 
+    if (!updatedEPI) return;
+
+    response.status(200).json(updatedEPI); 
+  } catch (error) {
+    next(error);
+  }
+});
   
 // Supprimer un EPI par ID
 router.delete("/:id", async (request: Request, response: Response, next: NextFunction) => {
@@ -92,6 +91,7 @@ router.delete("/:id", async (request: Request, response: Response, next: NextFun
     }
 });
 
+// Ajouter un EPI
 router.post("/",
     async (
         request: Request,

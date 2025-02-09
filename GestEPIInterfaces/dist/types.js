@@ -1,15 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CheckStatus = exports.UserTypes = void 0;
-var UserTypes;
-(function (UserTypes) {
-    UserTypes["ADMIN"] = "admin";
-    UserTypes["MANAGER"] = "manager";
-    UserTypes["USER"] = "user";
-})(UserTypes || (exports.UserTypes = UserTypes = {}));
-var CheckStatus;
-(function (CheckStatus) {
-    CheckStatus["OPERATIONNEL"] = "operationnel";
-    CheckStatus["REPARER"] = "reparer";
-    CheckStatus["REBUT"] = "rebut";
-})(CheckStatus || (exports.CheckStatus = CheckStatus = {}));
+exports.UserRole = exports.EPIStatus = exports.EPIType = void 0;
+// Types énumérés
+var EPIType;
+(function (EPIType) {
+    EPIType["CORDE"] = "CORDE";
+    EPIType["SANGLE"] = "SANGLE";
+    EPIType["LONGE"] = "LONGE";
+    EPIType["BAUDRIER"] = "BAUDRIER";
+    EPIType["CASQUE"] = "CASQUE";
+    EPIType["ASSURAGE"] = "ASSURAGE";
+    EPIType["MOUSQUETON"] = "MOUSQUETON";
+})(EPIType || (exports.EPIType = EPIType = {}));
+var EPIStatus;
+(function (EPIStatus) {
+    EPIStatus["OPERATIONNEL"] = "OPERATIONNEL";
+    EPIStatus["A_REPARER"] = "A_REPARER";
+    EPIStatus["MIS_AU_REBUT"] = "MIS_AU_REBUT";
+})(EPIStatus || (exports.EPIStatus = EPIStatus = {}));
+var UserRole;
+(function (UserRole) {
+    UserRole["GESTIONNAIRE"] = "GESTIONNAIRE";
+    UserRole["CORDISTE"] = "CORDISTE";
+})(UserRole || (exports.UserRole = UserRole = {}));

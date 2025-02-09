@@ -1,6 +1,5 @@
-//********** Imports **********//
 import express, { NextFunction, Request, Response } from "express";
-import { USERS } from "gestepiinterfaces";
+import { UserRole, User } from "gestepiinterfaces";
 
 import {
   handleGetAllUsers,
@@ -13,17 +12,13 @@ import {
 } from "../managers/userManager";
 
 const router = express.Router();
-//********** Routes **********//
-
-// READ MIDDLEWARE
 
 // Voir les utilisateurs par filtre
-
 router.get(
   "/filtres",
   async (
     request: Request,
-    response: Response<USERS[] | string>,
+    response: Response<User[] | string>,
     next: NextFunction
   ) => {
     try {
@@ -41,7 +36,7 @@ router.get(
   "/",
   async (
     request: Request,
-    response: Response<USERS[] | string>,
+    response: Response<User[] | string>,
     next: NextFunction
   ) => {
     try {
@@ -58,7 +53,7 @@ router.get(
   "/:id",
   async (
     request: Request,
-    response: Response<USERS[] | string>,
+    response: Response<User[] | string>,
     next: NextFunction
   ) => {
     try {
@@ -71,33 +66,46 @@ router.get(
 );
 
 // Route de mise à jour d'un utilisateur
-router.put("/", async (request: Request, response: Response<JSON>, next: NextFunction) => {
+router.put(
+  "/", 
+  async (
+    request: Request, 
+    response: Response<User[] | string>, 
+    next: NextFunction
+  ) => {
     try {
-      const updatedUser = await handlePutUser(request, next); 
-  
+      const updatedUser = await handlePutUser(request, next);
       if (!updatedUser) return;
-  
-      response.status(200).json(updatedUser); 
+      response.status(200).json(updatedUser);
     } catch (error) {
       next(error);
     }
-  });
+  }
+);
 
 // Supprimer un utilisateur par ID
-router.delete("/:id", async (request: Request, response: Response, next: NextFunction) => {
+router.delete(
+  "/:id", 
+  async (
+    request: Request, 
+    response: Response<{ message: string } | string>, 
+    next: NextFunction
+  ) => {
     try {
-        const result = await handleDeleteUser(request, next);
-        response.status(200).json(result); // Retourne le message de succès
+      const result = await handleDeleteUser(request, next);
+      response.status(200).json(result);
     } catch (error) {
-        next(error); // Passe l'erreur au middleware de gestion des erreurs
+      next(error);
     }
-});
+  }
+);
 
 // Ajouter un nouvel utilisateur
-router.post("/",
+router.post(
+  "/",
   async (
     request: Request,
-    response: Response<USERS | string>,
+    response: Response<User | string>,
     next: NextFunction
   ) => {
     try {
@@ -109,11 +117,12 @@ router.post("/",
   }
 );
 
+// Login
 router.post(
   "/login",
   async (
     request: Request,
-    response: Response,
+    response: Response<{user: Partial<User>, token: string} | string>,
     next: NextFunction
   ) => {
     try {

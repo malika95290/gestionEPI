@@ -1,6 +1,6 @@
 //********** Imports **********//
 import { pool } from "./bdd"; // Connexion à la base de données
-import { EPI } from "gestepiinterfaces"; // Interface de l'EPI
+import { Controle, EPI, EPIType } from "gestepiinterfaces"; // Interface de l'EPI
 
 //********** Model **********//
 export const epiModel = {
@@ -36,7 +36,7 @@ export const epiModel = {
           }
           return rows;
         } catch (error) {
-          throw new Error(`Aucun avion trouvé ayant l'id : ${id}`);
+          throw new Error(`Aucun epi trouvé ayant l'id : ${id}`);
         } finally {
           if (connection) connection.release();
         }
@@ -75,7 +75,7 @@ export const epiModel = {
         }
       },
       
-      update: async (params: Record<string, string | number | Date | undefined>) => {
+      update: async (params: Record<string, string | number | Date | undefined | boolean>) => {
         let connection;
         try {
             // Vérification que l'ID est bien présent dans les paramètres
@@ -85,12 +85,17 @@ export const epiModel = {
     
                 // Ajout des colonnes à mettre à jour
                 Object.keys(params).forEach((item) => {
-                    if (item === "idInterne" || item === "idCheck" || item === "idTypes" || item === "marque" || 
-                        item === "model" || item === "taille" || item === "couleur" || item === "numeroDeSerie" || 
-                        item === "dateAchat" || item === "dateFabrication" || item === "dateMiseEnService" || item === "frequenceControle") {
-                        
+                    if (item !== "id") { // Exclure l'ID de la liste des mises à jour
                         let value = params[item];
-                        updates.push(`${item} = "${value}"`);
+                        if (value instanceof Date) {
+                            // Formater la date en YYYY-MM-DD
+                            updates.push(`${item} = '${value.toISOString().split('T')[0]}'`);
+                        } else if (typeof value === "boolean") {
+                            // Convertir les booléens en 'true' ou 'false'
+                            updates.push(`${item} = ${value ? "true" : "false"}`);
+                        } else {
+                            updates.push(`${item} = '${value}'`);
+                        }
                     }
                 });
     
@@ -113,7 +118,7 @@ export const epiModel = {
                 return rows;
             }
         } catch (error) {
-            throw new Error(`AUCUN EPI MODIFIÉ - Erreur lors de la mise à jour.`);
+            throw new Error(`AUCUN EPI MODIFIÉ - Erreur lors de la mise à jour`);
         } finally {
             if (connection) connection.release();
         }
@@ -139,59 +144,83 @@ export const epiModel = {
     },
 
     addOne: async (epi: {
-      idInterne: number;
-      idCheck: number;
-      idTypes: number;
-      numeroDeSerie: number;
+      id: string; // Type string pour correspondre à l'interface
+      interneId: string; // Type string pour correspondre à l'interface
+      type: EPIType;
+      marque: string;
+      modele: string;
+      taille?: string;
+      couleur?: string;
+      numeroSerie: string; // Type string pour correspondre à l'interface
       dateAchat: Date;
       dateFabrication: Date;
       dateMiseEnService: Date;
-      frequenceControle: string;
-      marque?: string;
-      model?: string;
-      taille?: string;
-      couleur?: string;
-  }) => {
+      frequenceControle: number; // Type number pour correspondre à l'interface
+      isTextile: boolean;
+      controles: Controle[];
+    }) => {
       let connection;
       try {
-          // Validation des champs requis
-          if (!epi.idInterne || !epi.idTypes || !epi.numeroDeSerie || !epi.dateAchat || !epi.dateFabrication || !epi.dateMiseEnService || !epi.frequenceControle) {
-              throw new Error("AUCUN EPI AJOUTE ? Peut-être manque-t-il des données ?");
-          }
-  
-          connection = await pool.getConnection();
-  
-          // Requête d'insertion des données dans la base
-          const result = await connection.query(
-              `INSERT INTO epi (idInterne, idCheck, idTypes, numeroDeSerie, dateAchat, dateFabrication, dateMiseEnService, frequenceControle, marque, model, taille, couleur) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
-              [
-                  epi.idInterne, epi.idCheck || null, epi.idTypes, epi.numeroDeSerie, 
-                  epi.dateAchat, epi.dateFabrication, epi.dateMiseEnService, epi.frequenceControle,
-                  epi.marque, epi.model, epi.taille, epi.couleur
-              ] // Utilisation des paramètres pour éviter les injections SQL
-          );
-  
-          // Vérification si l'insertion a réussi
-          if (result.affectedRows === 0) {
-              throw new Error("AUCUN EPI AJOUTE");
-          }
-          
-          return {
-            ...epi,
-            id: Number(result.insertId),
+        // Validation des champs requis
+        if (
+          !epi.interneId ||
+          !epi.marque ||
+          !epi.modele ||
+          !epi.type ||
+          !epi.numeroSerie ||
+          !epi.dateAchat ||
+          !epi.dateFabrication ||
+          !epi.dateMiseEnService ||
+          epi.frequenceControle === undefined || // Validation du champ frequenceControle
+          epi.isTextile === undefined // Validation du champ isTextile
+        ) {
+          throw new Error("AUCUN EPI AJOUTE ? Peut-être manque-t-il des données ?");
+        }
+    
+        connection = await pool.getConnection();
+    
+        // Requête d'insertion des données dans la base
+        const result = await connection.query(
+          `INSERT INTO epi (
+            interneId, type, numeroSerie, dateAchat, dateFabrication, 
+            dateMiseEnService, frequenceControle, marque, modele, taille, couleur, isTextile
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+          [
+            epi.interneId, // Déjà de type string
+            epi.type,
+            epi.numeroSerie, // Déjà de type string
+            epi.dateAchat,
+            epi.dateFabrication,
+            epi.dateMiseEnService,
+            epi.frequenceControle, // Déjà de type number
+            epi.marque,
+            epi.modele,
+            epi.taille,
+            epi.couleur,
+            epi.isTextile,
+          ]
+        );
+    
+        // Vérification si l'insertion a réussi
+        if (result.affectedRows === 0) {
+          throw new Error("AUCUN EPI AJOUTE");
+        }
+    
+        // Retourner l'EPI avec l'ID généré par la base de données
+        return {
+          ...epi,
+          id: result.insertId.toString(), // Convertir l'ID en string pour correspondre à l'interface
         };
-  
       } catch (error) {
-          if (error instanceof Error) {
-              throw new Error(error.message || "AUCUN EPI AJOUTE ? Peut-être manque-t-il des données ?");
-          } else {
-              throw new Error("Une erreur inconnue est survenue.");
-          }
+        if (error instanceof Error) {
+          throw new Error(error.message || "AUCUN EPI AJOUTE ? Peut-être manque-t-il des données ?");
+        } else {
+          throw new Error("Une erreur inconnue est survenue.");
+        }
       } finally {
-          if (connection) connection.release(); // Libérer la connexion
+        if (connection) connection.release(); // Libérer la connexion
       }
-  },
+    },
   
   
   

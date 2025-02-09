@@ -1,10 +1,10 @@
 //********** Imports **********//
 import { pool } from "./bdd"; // Connexion à la base de données
-import { USERS } from "gestepiinterfaces"; // Interface des utilisateurs
+import { UserRole, User } from "gestepiinterfaces"; // Interface des utilisateurs
 
 //********** Model **********//
-export const usersModel = {
-    getAll: async (): Promise<USERS[]> => {
+export const UserRoleModel = {
+    getAll: async (): Promise<User[]> => {
       let connection;
       try {
         connection = await pool.getConnection();
@@ -46,12 +46,12 @@ export const usersModel = {
         try {
           connection = await pool.getConnection();
     
-          let query = "SELECT * FROM USERS WHERE ";
+          let query = "SELECT * FROM users WHERE ";
           const values: (string | number)[] = [];
           const keys = Object.keys(params);
     
           if (keys.length === 0) {
-            query = "SELECT * FROM USERS";
+            query = "SELECT * FROM users";
           } else {
             keys.forEach((key, index) => {
               query += `${key} = ?`;
@@ -84,7 +84,7 @@ export const usersModel = {
     
                 // Ajout des colonnes à mettre à jour
                 Object.keys(params).forEach((item) => {
-                    if (item === "idUserTypes" || item === "nom" || item === "prenom" || item === "mdp") {
+                    if (item === "nom" || item === "prenom" || item === "email" || item === "password" || item === "role") {
                         let value = params[item];
                         updates.push(`${item} = "${value}"`);
                     }
@@ -135,15 +135,17 @@ export const usersModel = {
     },
 
     addOne : async (user: {
-      idUserTypes: number;
+      id: string;
       nom: string;
       prenom: string;
-      mdp: string;
+      email: string;
+      password: string;
+      role : UserRole;
       }) => {
       let connection;
       try {
           // Validation des champs requis
-          if (!user.idUserTypes || !user.nom || !user.prenom || !user.mdp) {
+          if (!user.nom || !user.prenom || !user.email || !user.password || !user.role) {
               throw new Error("AUCUN UTILISATEUR AJOUTE ? Peut-être manque-t-il des données ?");
           }
 
@@ -151,10 +153,10 @@ export const usersModel = {
 
           // Requête d'insertion des données dans la base
           const result = await connection.query(
-              `INSERT INTO users (idUserTypes, nom, prenom, mdp) 
-              VALUES (?, ?, ?, ?);`,
+              `INSERT INTO users (nom, prenom, email, password, role) 
+              VALUES (?, ?, ?, ?, ?);`,
               [
-                  user.idUserTypes, user.nom, user.prenom, user.mdp
+                  user.nom, user.prenom, user.email, user.password, user.role
               ]
           );
 

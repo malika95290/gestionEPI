@@ -1,52 +1,57 @@
-export declare enum UserTypes {
-    ADMIN = "admin",
-    MANAGER = "manager",
-    USER = "user"
+declare enum EPIType {
+    CORDE = "CORDE",
+    SANGLE = "SANGLE",
+    LONGE = "LONGE",
+    BAUDRIER = "BAUDRIER",
+    CASQUE = "CASQUE",
+    ASSURAGE = "ASSURAGE",
+    MOUSQUETON = "MOUSQUETON"
 }
-export declare enum CheckStatus {
-    OPERATIONNEL = "operationnel",
-    REPARER = "reparer",
-    REBUT = "rebut"
+declare enum EPIStatus {
+    OPERATIONNEL = "OPERATIONNEL",
+    A_REPARER = "A_REPARER",
+    MIS_AU_REBUT = "MIS_AU_REBUT"
 }
-export interface EpiType {
-    id: number;
-    nom: string;
+declare enum UserRole {
+    GESTIONNAIRE = "GESTIONNAIRE",
+    CORDISTE = "CORDISTE"
 }
-export interface userTypes {
-    id: number;
-    role: UserTypes;
-}
-export interface USERS {
-    id: number;
-    idUserTypes: number;
+interface User {
+    id: string;
     nom: string;
     prenom: string;
-    mdp: string;
+    email: string;
+    password: string;
+    role: UserRole;
 }
-export interface EPI {
-    id: number;
-    idInterne: number;
-    idCheck: number;
-    idTypes: number;
-    marque?: string;
-    model?: string;
+interface Gestionnaire extends User {
+    role: UserRole.GESTIONNAIRE;
+}
+interface Cordiste extends User {
+    role: UserRole.CORDISTE;
+}
+interface EPI {
+    id: string;
+    interneId: string;
+    numeroSerie: string;
+    marque: string;
+    modele: string;
+    type: EPIType;
     taille?: string;
     couleur?: string;
-    numeroDeSerie: number;
     dateAchat: Date;
     dateFabrication: Date;
     dateMiseEnService: Date;
-    frequenceControle: string;
+    isTextile: boolean;
+    frequenceControle: number;
+    controles: Controle[];
 }
-export interface epiCheck {
-    id: number;
-    idStatus: number;
-    idGestionnaire: number;
-    idEPI: number;
+interface Controle {
+    id: string;
+    epiId: string;
     dateControle: Date;
-    remarque: string;
+    status: EPIStatus;
+    gestionnaireId: string;
+    remarques?: string;
 }
-export interface checkStatus {
-    id: number;
-    status: CheckStatus;
-}
+export { EPIType, EPIStatus, UserRole, Gestionnaire, Cordiste, EPI, Controle };

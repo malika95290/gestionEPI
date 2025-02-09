@@ -1,13 +1,33 @@
 import { NextFunction, Request } from "express";
-import { USERS } from "gestepiinterfaces";
-import { usersModel } from "../models/userModel";
+import { UserRole, User } from "gestepiinterfaces";
+import { UserRoleModel } from "../models/userModel";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
 
-// Récupérer tous les utilisateurs
-export const handleGetAllUsers = async (request: Request, next: NextFunction): Promise<USERS[]> => {
+// Helper function to validate and transform user data
+const validateAndTransformUser = (data: any): User => {
+  if (!data.nom || !data.prenom || !data.email || !data.password || !data.role) {
+    throw new Error("All required fields must be provided");
+  }
+  
+  if (data.role !== 'GESTIONNAIRE' && data.role !== 'CORDISTE') {
+    throw new Error("Invalid role specified");
+  }
+
+  return {
+    id: data.id?.toString() || "",
+    nom: data.nom,
+    prenom: data.prenom,
+    email: data.email,
+    password: data.password,
+    role: data.role as UserRole
+  };
+};
+
+// Rest of the functions remain the same
+export const handleGetAllUsers = async (request: Request, next: NextFunction): Promise<User[]> => {
     try {
-      const users = await usersModel.getAll(); // Suppose que `getAll` est une méthode du modèle
+      const users = await UserRoleModel.getAll();
       return users;
     } catch (error) {
       next(error);
@@ -15,164 +35,168 @@ export const handleGetAllUsers = async (request: Request, next: NextFunction): P
     }
 };
 
-// Récupérer un utilisateur par son ID
-export const handleGetUserById = async (id: string, next: NextFunction) => {
-  return (await usersModel.getById(id)) satisfies USERS[];
+export const handleGetUserById = async (id: string, next: NextFunction): Promise<User[]> => {
+  return await UserRoleModel.getById(id);
 };
 
 export const handleGetUsersByFilters = async (
   params: Record<string, string | number | undefined>,
   next: NextFunction
-) => {
+): Promise<User[]> => {
   try {
     const filteredParams: Record<string, string | number> = {};
 
-    if (params.id) filteredParams["id"] = parseInt(params.id as string, 10);
-    if (params.idUserTypes) filteredParams["idUserTypes"] = parseInt(params.idUserTypes as string, 10);
+    if (params.id) filteredParams["id"] = params.id.toString();
     if (params.nom) filteredParams["nom"] = params.nom.toString().trim();
     if (params.prenom) filteredParams["prenom"] = params.prenom.toString().trim();
-    if (params.mdp) filteredParams["mdp"] = params.mdp.toString().trim();
+    if (params.email) filteredParams["email"] = params.email.toString().trim();
+    if (params.password) filteredParams["password"] = params.password.toString().trim();
+    if (params.role) filteredParams["role"] = params.role.toString().trim();
 
-    return (await usersModel.getWithFilters(filteredParams)) satisfies USERS[];
+    return await UserRoleModel.getWithFilters(filteredParams);
   } catch (error) {
     next(error);
+    throw error;
   }
 };
 
-
-// Fonction de gestion de la mise à jour d'un utilisateur
-export const handlePutUser = async (request: Request, next: NextFunction) => {
+export const handlePostUser = async (request: Request, next: NextFunction) => {
   try {
-    // Extraction des paramètres du corps de la requête
-    const { 
-      id, 
-      idUserTypes, 
-      nom, 
-      prenom, 
-      mdp 
-    } = request.body;
-
-    // Vérification que l'ID de l'utilisateur est présent
-    if (!id) {
-      throw new Error("L'id de l'utilisateur est requis.");
+    // Vérification des champs obligatoires
+    const body = request.body;
+    
+    if (!body.nom || !body.prenom || !body.email || !body.password || !body.role) {
+        throw new Error("Tous les champs obligatoires doivent être fournis.");
     }
 
-    // Préparation des paramètres à mettre à jour
-    const params: Record<string, string | number | Date | undefined> = { id };
-
-    if (idUserTypes) params["idUserTypes"] = idUserTypes;
-    if (nom) params["nom"] = nom;
-    if (prenom) params["prenom"] = prenom;
-    if (mdp) params["mdp"] = mdp;
-
-    // Mise à jour dans la base de données
-    const results = await usersModel.update(params);
-
-    // Vérification si des lignes ont été affectées
-    if (results.affectedRows === 0) {
-      throw new Error("Aucun utilisateur trouvé avec cet id.");
-    }
-
-    // Retourner l'utilisateur mis à jour
-    return await usersModel.getById(id);
+    // Hachage du mot de passe
+    const saltRounds = 10;  // Nombre de tours pour le hachage
+    const hashedPassword = await bcrypt.hash(body.password, saltRounds);
+    
+    // Préparation de l'objet utilisateur avec mot de passe haché
+    const user = {
+        id: body.id?.toString() || "",  // Conversion explicite en string
+        nom: body.nom,
+        prenom: body.prenom,
+        email: body.email,
+        password: hashedPassword,  // Utilisation du mot de passe haché
+        role: body.role as UserRole
+    };
+    
+    // Ajouter l'utilisateur en base de données via le modèle
+    const result = await UserRoleModel.addOne(user);
+    return {
+        ...result,
+        id: result.id.toString() // Assure que l'ID retourné est bien une string
+    };
   } catch (error) {
-    next(error); // Propagation de l'erreur au middleware d'erreur
+    next(error);
+    throw error;
   }
 };
 
-// Suppression d'un utilisateur
+export const handlePutUser = async (request: Request, next: NextFunction): Promise<User[]> => {
+  try {
+    const { id, ...updateData } = request.body;
+
+    if (!id) {
+      throw new Error("User ID is required");
+    }
+
+    const params: Record<string, string | number | Date | undefined> = { 
+      id,
+      ...updateData
+    };
+
+    await UserRoleModel.update(params);
+    return await UserRoleModel.getById(id);
+  } catch (error) {
+    next(error);
+    throw error;
+  }
+};
+
 export const handleDeleteUser = async (request: Request, next: NextFunction) => {
   try {
-      const id = parseInt(request.params.id); // Récupérer l'ID depuis les paramètres
-      if (!id) {
-          throw new Error("ID de l'utilisateur manquant ou invalide.");
-      }
+    const id = parseInt(request.params.id);
+    if (!id) {
+      throw new Error("Invalid user ID");
+    }
 
-      const results = await usersModel.delete(id);
-      if (results.affectedRows === 0) {
-          throw new Error("Erreur : aucun utilisateur supprimé (ID introuvable).");
-      }
-
-      return { message: `L'utilisateur ayant l'id : ${id} a été supprimé.` }; // Message de succès
+    const results = await UserRoleModel.delete(id);
+    return { message: `User with ID ${id} has been deleted` };
   } catch (error) {
-      next(error); // Passe l'erreur pour qu'elle soit gérée
+    next(error);
+    throw error;
   }
 };
 
-// Ajouter un nouvel utilisateur
-export const handlePostUser = async (request: Request, next: NextFunction) => {
-  // Vérification des champs obligatoires
-  const body = request.body;
-  
-  if (!body.idUserTypes || !body.nom || !body.prenom || !body.mdp) {
-      throw new Error("Tous les champs obligatoires doivent être fournis.");
-  }
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-  // Hachage du mot de passe
-  const saltRounds = 10;  // Nombre de tours pour le hachage
-  const hashedPassword = await bcrypt.hash(body.mdp, saltRounds);
+const validateLoginCredentials = (data: any) => {
+  if (!data.nom || !data.prenom || !data.password) {
+    throw new Error("Nom, prénom et mot de passe sont requis pour la connexion");
+  }
   
-  // Préparation de l'objet utilisateur avec mot de passe haché
-  const user: USERS = {
-      idUserTypes: body.idUserTypes,
-      nom: body.nom,
-      prenom: body.prenom,
-      mdp: hashedPassword,  // Utilisation du mot de passe haché
-      id: 0 // ID est généré automatiquement par la base de données
+  return {
+    nom: data.nom,
+    prenom: data.prenom,
+    password: data.password
   };
-  
-  // Ajouter l'utilisateur en base de données via le modèle
-  return await usersModel.addOne(user);
 };
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // Use environment variable in production
 
 export const handleLogin = async (request: Request, next: NextFunction) => {
   try {
-    const { nom, prenom, mdp } = request.body;
-    console.log(nom, prenom, mdp);
+    // Use specific login validation instead of full user validation
+    const credentials = validateLoginCredentials(request.body);
     
-    // Validate input
-    if (!nom || !prenom || !mdp) {
-      throw new Error('Nom, prénom et mot de passe sont requis');
+    let user;
+    try {
+      user = await UserRoleModel.findByCredentials(
+        credentials.nom,
+        credentials.prenom,
+        credentials.password
+      );
+    } catch (error) {
+      throw new Error('Utilisateur non trouvé');
     }
 
-    // Find user by credentials
-    const user = await usersModel.findByCredentials(nom, prenom, mdp);
-
-    console.log(user);
-
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(mdp, user.mdp);
-    console.log(isPasswordValid);
-    
-    if (!isPasswordValid) {
-      throw new Error('Invalid credentials');
+    if (!user) {
+      throw new Error('Identifiants invalides');
     }
 
-    // Generate JWT token
+    try {
+      const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+      if (!isPasswordValid) {
+        throw new Error('Mot de passe incorrect');
+      }
+    } catch (error) {
+      throw new Error('Erreur lors de la vérification du mot de passe');
+    }
+
     const token = jwt.sign(
       { 
-        userId: user.id,
-        userType: user.idUserTypes 
+        id: user.id,
+        role: user.role 
       },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
 
-    // Return user info and token
     return {
       user: {
         id: user.id,
         nom: user.nom,
         prenom: user.prenom,
-        idUserTypes: user.idUserTypes
+        email: user.email,
+        role: user.role
       },
       token
     };
   } catch (error) {
-    next(error);
-    throw new Error('Login failed');
+    // Log the specific error for debugging
+    console.error('Login error:', error);
+    // Throw a more specific error message
+    throw error instanceof Error ? error : new Error('Une erreur est survenue lors de la connexion');
   }
 };
-

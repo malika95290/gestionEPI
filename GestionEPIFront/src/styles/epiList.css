@@ -25,28 +25,60 @@ background-color: #f9f9f9;
 
 /* Boutons d'action */
 .edit-button {
-background-color: #ffc107;
-color: white;
+background-color: white;
+color: black;
 border: none;
 padding: 5px 10px;
-border-radius: 4px;
 cursor: pointer;
 margin-right: 5px;
 }
 
-.edit-button:hover {
-background-color: #e0a800;
-}
-
 .delete-button {
-background-color: #dc3545;
-color: white;
+background-color: white;
+color: black;
 border: none;
 padding: 5px 10px;
-border-radius: 4px;
 cursor: pointer;
 }
 
-.delete-button:hover {
-background-color: #c82333;
+.edit-button:hover,
+.delete-button:hover{
+    background-color: #f9f9f9;
 }
+
+/* Message de suppresion */
+.success-message {
+    background-color: #4CAF50; /* Vert */
+    color: white;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    text-align: center;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    animation: fadeInOut 5s ease-in-out;
+}    
+
+.error-message {
+    background-color: #f44336; /* Rouge */
+    color: white;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    text-align: center;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    animation: fadeInOut 3s ease-in-out;
+}    
+
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}    
+

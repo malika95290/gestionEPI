@@ -1,6 +1,6 @@
 //********** Imports **********//
 import express, { NextFunction, Request, Response } from "express";
-import { epiCheck } from "gestepiinterfaces";
+import { EPIStatus, Controle } from "gestepiinterfaces";
 
 import {
   handleGetAllEpiChecks,
@@ -22,7 +22,7 @@ router.get(
   "/filtres",
   async (
     request: Request,
-    response: Response<epiCheck[] | string>,
+    response: Response<Controle[] | string>, // Utilisez Controle[] au lieu de epiCheck[]
     next: NextFunction
   ) => {
     try {
@@ -40,12 +40,12 @@ router.get(
   "/",
   async (
     request: Request,
-    response: Response<epiCheck[] | string>,
+    response: Response<Controle[] | string>, // Utilisez Controle[] au lieu de epiCheck[]
     next: NextFunction
   ) => {
     try {
-      const epiChecks = await handleGetAllEpiChecks(request, next);
-      response.status(200).json(epiChecks);
+      const controles = await handleGetAllEpiChecks(request, next);
+      response.status(200).json(controles);
     } catch (error) {
       next(error);
     }
@@ -57,49 +57,74 @@ router.get(
   "/:id",
   async (
     request: Request,
-    response: Response<epiCheck[] | string>,
+    response: Response<Controle | string>, // Utilisez Controle au lieu de epiCheck[]
     next: NextFunction
   ) => {
     try {
       const id = request.params.id;
-      response.status(200).json(await handleGetEpiCheckById(id, next));
+      const controle = await handleGetEpiCheckById(id, next);
+      response.status(200).json(controle);
     } catch (error) {
       next(error);
     }
   }
 );
 
+
 // Route de mise à jour d'un EPI Check
-router.put("/", async (request: Request, response: Response<JSON>, next: NextFunction) => {
-  try {
-    const updatedEpiCheck = await handlePutEpiCheck(request, next);
+router.put(
+  "/",
+  async (
+    request: Request,
+    response: Response<Controle | string>, // Utilisez Controle au lieu de JSON
+    next: NextFunction
+  ) => {
+    try {
+      const updatedControle = await handlePutEpiCheck(request, next);
 
-    if (!updatedEpiCheck) return;
+      if (!updatedControle) {
+        throw new Error("Aucun contrôle mis à jour.");
+      }
 
-    response.status(200).json(updatedEpiCheck); 
-  } catch (error) {
-    next(error);
+      response.status(200).json(updatedControle);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 // Supprimer un EPI Check par ID
-router.delete("/:id", async (request: Request, response: Response, next: NextFunction) => {
-  try {
-    const result = await handleDeleteEpiCheck(request, next);
-    response.status(200).json(result); // Retourne le message de succès
-  } catch (error) {
-    next(error); // Passe l'erreur au middleware de gestion des erreurs
+router.delete(
+  "/:id",
+  async (
+    request: Request,
+    response: Response<{ message: string }>, // Retourne un message de succès
+    next: NextFunction
+  ) => {
+    try {
+      const result = await handleDeleteEpiCheck(request, next);
+      response.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 // Ajouter un nouvel EPI Check
-router.post("/", async (request: Request, response: Response<epiCheck | string>, next: NextFunction) => {
-  try {
-    const newEpiCheck = await handlePostEpiCheck(request, next);
-    response.status(201).json(newEpiCheck);
-  } catch (error) {
-    next(error);
+router.post(
+  "/",
+  async (
+    request: Request,
+    response: Response<Controle | string>, // Utilisez Controle au lieu de epiCheck
+    next: NextFunction
+  ) => {
+    try {
+      const newControle = await handlePostEpiCheck(request, next);
+      response.status(201).json(newControle);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 export default router;

@@ -1,92 +1,109 @@
-// AddEPIForm.tsx
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/apiService';
-import { EPI, EpiType, CheckStatus } from '../../../../GestEPIInterfaces';
+import { EPI, EPIType } from 'gestepiinterfaces';
 
-interface AddEPIFormProps {
-  onEpiAdded: () => void;
+interface EPIFormProps {
+  onSubmitSuccess: () => void;
+  initialData?: EPI;
+  isEditing?: boolean;
 }
 
-const AddEPIForm: React.FC<AddEPIFormProps> = ({ onEpiAdded }) => {
+const EPIForm: React.FC<EPIFormProps> = ({ onSubmitSuccess, initialData, isEditing = false }) => {
   const [formData, setFormData] = useState<Partial<EPI>>({
-    idInterne: 0,
-    idTypes: 0,
+    interneId: "",
+    type: EPIType.CORDE,
     marque: "",
-    model: "",
+    modele: "",
     taille: "",
     couleur: "",
-    numeroDeSerie: 0,
+    numeroSerie: "",
     dateAchat: new Date(),
     dateFabrication: new Date(),
     dateMiseEnService: new Date(),
-    frequenceControle: "",
+    frequenceControle: 0,
+    isTextile: true
   });
 
-  const [types, setTypes] = useState<EpiType[]>([]);
-  const [checkStatuses, setCheckStatuses] = useState<CheckStatus[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchTypesAndChecks = async () => {
-      try {
-        const epiTypesData = await apiService.get("/epi-types");
-        // const checkStatusesData = await apiService.get("/checkStatuses");
-        setTypes(epiTypesData);
-        // setCheckStatuses(checkStatusesData);
-      } catch (err) {
-        setError("Erreur lors du chargement des données.");
-      }
-    };
-
-    fetchTypesAndChecks();
-  }, []);
+    if (initialData) {
+      const formattedData = {
+        ...initialData,
+        dateAchat: new Date(initialData.dateAchat),
+        dateFabrication: new Date(initialData.dateFabrication),
+        dateMiseEnService: new Date(initialData.dateMiseEnService),
+        // Convertir isTextile en booléen si nécessaire
+        isTextile: Boolean(initialData.isTextile)
+      };
+      setFormData(formattedData);
+    }
+  }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: name.includes("date") ? new Date(value) : 
-              name === "idCheck" && value === "0" ? undefined : 
-              (name === "idInterne" || name === "idTypes" || name === "numeroDeSerie") ? Number(value) : 
+              name === "type" ? value as EPIType :
+              name === "frequenceControle" ? parseInt(value, 10) :
+              name === "isTextile" ? value === "true" :
               value
     }));
+  };
+
+  const formatDateForAPI = (date: Date | undefined): string => {
+    if (!date) return new Date().toISOString().split('T')[0];
+    return new Date(date).toISOString().split('T')[0];
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Vérification des champs obligatoires
-    if (!formData.idInterne || !formData.idTypes || !formData.numeroDeSerie) {
+    if (!formData.interneId || !formData.type || !formData.numeroSerie) {
       setError("Veuillez remplir tous les champs obligatoires.");
       return;
     }
 
-    const formDataToSend = {
-      ...formData,
-      dateAchat: formData.dateAchat?.toISOString().split("T")[0],
-      dateFabrication: formData.dateFabrication?.toISOString().split("T")[0],
-      dateMiseEnService: formData.dateMiseEnService?.toISOString().split("T")[0],
-    };
-
     try {
-      await apiService.post("/epis", formDataToSend);
-      alert("EPI ajouté avec succès !");
-      onEpiAdded();
+      // Déterminer isTextile basé sur le type d'EPI
+      const isTextile = [EPIType.CORDE, EPIType.SANGLE, EPIType.LONGE, EPIType.BAUDRIER].includes(formData.type as EPIType);
+
+      const formDataToSend = {
+        ...formData,
+        dateAchat: formatDateForAPI(formData.dateAchat),
+        dateFabrication: formatDateForAPI(formData.dateFabrication),
+        dateMiseEnService: formatDateForAPI(formData.dateMiseEnService),
+        isTextile: Number(isTextile), // Convertir en 1 ou 0 pour la base de données
+        frequenceControle: Number(formData.frequenceControle)
+      };
+
+      if (!isEditing) {
+        delete formDataToSend.id;
+      }
+
+      if (isEditing && initialData?.id) {
+        await apiService.put(`/epis/`, formDataToSend);
+      } else {
+        await apiService.post("/epis", formDataToSend);
+      }
+      onSubmitSuccess();
     } catch (err) {
-      setError("Erreur lors de l'ajout de l'EPI");
+      console.error('Erreur lors de la soumission:', err);
+      setError(`Erreur lors de ${isEditing ? 'la modification' : "l'ajout"} de l'EPI. Vérifier la saisie des champs`);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="add-epi-form">
+    <form onSubmit={handleSubmit} className="epi-form">
       {error && <p className="error-message">{error}</p>}
 
       <div className="form-group">
         <label>ID Interne: *</label>
         <input 
-          type="number" 
-          name="idInterne" 
-          value={formData.idInterne || ''} 
+          type="text" 
+          name="interneId" 
+          value={formData.interneId || ''} 
           onChange={handleChange} 
           required 
         />
@@ -95,42 +112,26 @@ const AddEPIForm: React.FC<AddEPIFormProps> = ({ onEpiAdded }) => {
       <div className="form-group">
         <label>Type d'EPI: *</label>
         <select 
-          name="idTypes" 
-          value={formData.idTypes || 0} 
+          name="type" 
+          value={formData.type || EPIType.CORDE} 
           onChange={handleChange} 
           required
         >
-          <option value={0}>Sélectionner un type</option>
-          {types.map((type) => (
-            <option key={type.id} value={type.id}>
-              {type.nom}
+          {Object.values(EPIType).map((type) => (
+            <option key={type} value={type}>
+              {type}
             </option>
           ))}
         </select>
       </div>
 
-      {/* <div className="form-group">
-        <label>Statut de Vérification:</label>
-        <select 
-          name="idCheck" 
-          value={formData.idCheck || 0} 
-          onChange={handleChange}
-        >
-          <option value={0}>Sélectionner un statut</option>
-          {checkStatuses.map((status) => (
-            <option key={status.id} value={status.id}>
-              {status.status}
-            </option>
-          ))}
-        </select>
-      </div> */}
-
+      {/* ... Autres champs du formulaire ... */}
       <div className="form-group">
         <label>Numéro de Série: *</label>
         <input 
-          type="number" 
-          name="numeroDeSerie" 
-          value={formData.numeroDeSerie || ''} 
+          type="text" 
+          name="numeroSerie" 
+          value={formData.numeroSerie || ''} 
           onChange={handleChange} 
           required 
         />
@@ -170,9 +171,9 @@ const AddEPIForm: React.FC<AddEPIFormProps> = ({ onEpiAdded }) => {
       </div>
 
       <div className="form-group">
-        <label>Fréquence de Contrôle: *</label>
+        <label>Fréquence de Contrôle (mois): *</label>
         <input 
-          type="text" 
+          type="number" 
           name="frequenceControle" 
           value={formData.frequenceControle} 
           onChange={handleChange} 
@@ -185,7 +186,7 @@ const AddEPIForm: React.FC<AddEPIFormProps> = ({ onEpiAdded }) => {
         <input 
           type="text" 
           name="marque" 
-          value={formData.marque} 
+          value={formData.marque || ''} 
           onChange={handleChange} 
         />
       </div>
@@ -194,40 +195,37 @@ const AddEPIForm: React.FC<AddEPIFormProps> = ({ onEpiAdded }) => {
         <label>Modèle:</label>
         <input 
           type="text" 
-          name="model" 
-          value={formData.model} 
+          name="modele" 
+          value={formData.modele || ''} 
           onChange={handleChange} 
         />
       </div>
 
       <div className="form-group">
         <label>Taille:</label>
-        <select 
-            name="taille" 
-            value={formData.taille || ''} 
-            onChange={handleChange} 
-            required
-        >
-            <option value="">Sélectionner une taille</option>
-            <option value="S">S</option>
-            <option value="M">M</option>
-            <option value="L">L</option>
-        </select>
-        </div>
+        <input 
+          type="text" 
+          name="taille" 
+          value={formData.taille || ''} 
+          onChange={handleChange} 
+        />
+      </div>
 
       <div className="form-group">
         <label>Couleur:</label>
         <input 
           type="text" 
           name="couleur" 
-          value={formData.couleur} 
+          value={formData.couleur || ''} 
           onChange={handleChange} 
         />
       </div>
 
-      <button type="submit" className="submit-button">Ajouter EPI</button>
+      <button type="submit" className="submit-button">
+        {isEditing ? 'Modifier' : 'Ajouter'} EPI
+      </button>
     </form>
   );
 };
 
-export default AddEPIForm;
+export default EPIForm;

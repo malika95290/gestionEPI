@@ -7,62 +7,41 @@ CREATE DATABASE gestionEPI;
 -- Utilisation de la base de données gestionEPI
 USE gestionEPI;
 
--- Création de la table checkStatus
-CREATE TABLE checkStatus (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    status VARCHAR(20)
+-- Table pour les utilisateurs (User)
+CREATE TABLE Users (
+    id INT PRIMARY KEY AUTO_INCREMENT, 
+    nom VARCHAR(255) NOT NULL,
+    prenom VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('GESTIONNAIRE', 'CORDISTE') NOT NULL
 );
 
--- Création de la table epiTypes
-CREATE TABLE epiTypes (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nom VARCHAR(10) NOT NULL
-);
-
--- Création de la table userTypes
-CREATE TABLE userTypes (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    role VARCHAR(10) NOT NULL
-);
-
--- Création de la table USERS
-CREATE TABLE USERS (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    idUserTypes INT,
-    nom VARCHAR(100),
-    prenom VARCHAR(100),
-    mdp VARCHAR(255),
-    FOREIGN KEY (idUserTypes) REFERENCES userTypes(id)
-);
-
--- Création de la table epiCheck
-CREATE TABLE epiCheck (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    idEPI INT,
-    dateControle DATE,
-    idStatus INT,
-    idGestionnaire INT,
-    remarque VARCHAR(100),
-    FOREIGN KEY (idStatus) REFERENCES checkStatus(id),
-    FOREIGN KEY (idGestionnaire) REFERENCES USERS(id)
-);
-
--- Création de la table EPI
+-- Table pour les EPI
 CREATE TABLE EPI (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    idInterne INT,
-    numeroDeSerie INT,
-    marque VARCHAR(100),
-    model VARCHAR(100),
-    idTypes INT,
-    taille VARCHAR(100),
-    couleur VARCHAR(100),
-    dateAchat DATE,
-    dateFabrication DATE,
-    dateMiseEnService DATE,
-    frequenceControle VARCHAR(100),
-    idCheck INT,
-    FOREIGN KEY (idCheck) REFERENCES epiCheck(id),
-    FOREIGN KEY (idTypes) REFERENCES epiTypes(id)
+    id INT PRIMARY KEY AUTO_INCREMENT, 
+    interneId VARCHAR(255) NOT NULL,
+    numeroSerie VARCHAR(255) NOT NULL,
+    marque VARCHAR(255) NOT NULL,
+    modele VARCHAR(255) NOT NULL,
+    type ENUM('CORDE', 'SANGLE', 'LONGE', 'BAUDRIER', 'CASQUE', 'ASSURAGE', 'MOUSQUETON') NOT NULL,
+    taille VARCHAR(50),
+    couleur VARCHAR(50),
+    dateAchat DATE NOT NULL,
+    dateFabrication DATE NOT NULL,
+    dateMiseEnService DATE NOT NULL,
+    isTextile BOOLEAN NOT NULL,
+    frequenceControle INT NOT NULL
 );
 
+-- Table pour les contrôles
+CREATE TABLE Controles (
+    id INT PRIMARY KEY AUTO_INCREMENT, 
+    epiId INT NOT NULL,
+    dateControle DATE NOT NULL,
+    status ENUM('OPERATIONNEL', 'A_REPARER', 'MIS_AU_REBUT') NOT NULL,
+    gestionnaireId INT NOT NULL,
+    remarques TEXT,
+    FOREIGN KEY (epiId) REFERENCES EPI(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (gestionnaireId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE CASCADE
+);

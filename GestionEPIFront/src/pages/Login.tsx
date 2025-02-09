@@ -5,7 +5,7 @@ import { AiOutlineExclamationCircle } from "react-icons/ai";
 import "../styles/login.css";
 
 export default function Login() {
-  const [formData, setFormData] = useState({ nom: "", prenom: "", mdp: "" });
+  const [formData, setFormData] = useState({ nom: "", prenom: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -50,7 +50,7 @@ export default function Login() {
 
         <div className="form-group">
           <label>Mot de passe</label>
-          <input type="password" name="mdp" value={formData.mdp} onChange={handleChange} required />
+          <input type="password" name="password" value={formData.password} onChange={handleChange} required />
         </div>
 
         <button type="submit" className="login-button">Se connecter</button>

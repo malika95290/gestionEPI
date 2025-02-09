@@ -1,61 +1,87 @@
-export enum UserTypes{
-    ADMIN = 'admin',
-    MANAGER = 'manager', 
-    USER = 'user'
-}
+// Types énumérés
+enum EPIType {
+    CORDE = 'CORDE',
+    SANGLE = 'SANGLE',
+    LONGE = 'LONGE',
+    BAUDRIER = 'BAUDRIER',
+    CASQUE = 'CASQUE',
+    ASSURAGE = 'ASSURAGE',
+    MOUSQUETON = 'MOUSQUETON'
+  }
+  
+  enum EPIStatus {
+    OPERATIONNEL = 'OPERATIONNEL',
+    A_REPARER = 'A_REPARER',
+    MIS_AU_REBUT = 'MIS_AU_REBUT'
+  }
+  
+  enum UserRole {
+    GESTIONNAIRE = 'GESTIONNAIRE',
+    CORDISTE = 'CORDISTE'
+  }
+  
+  interface User {
+    id: string;
+    nom: string;
+    prenom: string;
+    email: string;
+    password: string;
+    role: UserRole;
+  }
+  
+  // Interface pour un gestionnaire
+  interface Gestionnaire extends User {
+    role: UserRole.GESTIONNAIRE;
+  }
+  
+  // Interface pour un cordiste
+  interface Cordiste extends User {
+    role: UserRole.CORDISTE;
+  }
 
-export enum CheckStatus {
-    OPERATIONNEL = 'operationnel',
-    REPARER = 'reparer',
-    REBUT = 'rebut'
-}
-
-export interface EpiType{
-    id:number,
-    nom:string
-}
-
-export interface userTypes{
-    id:number,
-    role:UserTypes
-}
-
-export interface USERS{
-    id:number,
-    idUserTypes:number,
-    nom:string,
-    prenom:string,
-    mdp:string
-}
-
-export interface EPI{
-    id:number,
-    idInterne:number,
-    idCheck?:number,
-    idTypes:number,
-    marque?:string,
-    model?:string,
-    taille?:string,
-    couleur?:string,
-    numeroDeSerie:number,
-    dateAchat:Date,
-    dateFabrication:Date,
-    dateMiseEnService:Date,
-    frequenceControle:string
-}
-
-export interface epiCheck{
-    id:number,
-    idStatus:number,
-    idGestionnaire:number,
-    idEPI:number,
-    dateControle:Date,
-    remarque:string
-}
-
-export interface checkStatus{
-    id:number
-    status: CheckStatus
-}
-
-
+  // Interface principale pour un EPI
+  interface EPI {
+    id: string;
+    interneId: string;
+    numeroSerie: string;
+    marque: string;
+    modele: string;
+    type: EPIType;
+    taille?: string;
+    couleur?: string;
+    
+    // Dates importantes
+    dateAchat: Date;
+    dateFabrication: Date;
+    dateMiseEnService: Date;
+    
+    // Déterminé automatiquement basé sur la catégorie
+    isTextile: boolean;
+    
+    // Période de contrôle en mois
+    frequenceControle: number;
+    
+    // Relations
+    controles: Controle[];
+  }
+  
+  // Interface pour un contrôle
+  interface Controle {
+    id: string;
+    epiId: string;
+    dateControle: Date;
+    status: EPIStatus;
+    gestionnaireId: string;
+    remarques?: string;
+  }
+  
+  export {
+    EPIType,
+    EPIStatus,
+    UserRole,
+    User,
+    Gestionnaire,
+    Cordiste,
+    EPI,
+    Controle
+  };

@@ -1,6 +1,6 @@
 {
   "name": "gestepiinterfaces",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Interfaces TypeScript partagées pour le projet GestEPI ",
   "main": "dist/index.js",
   "types": "dist/types.d.ts",

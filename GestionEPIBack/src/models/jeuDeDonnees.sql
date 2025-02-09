@@ -1,41 +1,23 @@
--- Insertion des types de statut de contrôle (checkStatus)
-INSERT INTO checkStatus (status) VALUES
-('operationnel'),
-('reparer'),
-('rebut');
+-- Utilisation de la base de données gestionEPI
+USE gestionEPI;
 
--- Insertion des types d'utilisateurs (userTypes)
-INSERT INTO userTypes (role) VALUES
-('admin'),
-('manager'),
-('user');
+-- Insertion des utilisateurs
+INSERT INTO Users (nom, prenom, email, password, role) VALUES
+('Dupont', 'Jean', 'jean.dupont@example.com', 'password123', 'GESTIONNAIRE'),
+('Martin', 'Alice', 'alice.martin@example.com', 'password456', 'CORDISTE'),
+('Bernard', 'Luc', 'luc.bernard@example.com', 'password789', 'GESTIONNAIRE'),
+('Petit', 'Sophie', 'sophie.petit@example.com', 'password101', 'CORDISTE');
 
--- Insertion des utilisateurs (USERS)
-INSERT INTO USERS (idUserTypes, nom, prenom, mdp) VALUES
-(1, 'Dupont', 'Jean', 'password123'),  -- Admin
-(2, 'Martin', 'Paul', 'password456'),  -- Manager
-(3, 'Durand', 'Luc', 'password789');   -- User
+-- Insertion des EPI
+INSERT INTO EPI (interneId, numeroSerie, marque, modele, type, taille, couleur, dateAchat, dateFabrication, dateMiseEnService, isTextile, frequenceControle) VALUES
+('EPI-001', 'SN123456', 'Petzl', 'Volta', 'CORDE', '70m', 'Rouge', '2022-01-15', '2021-12-01', '2022-02-01', TRUE, 6),
+('EPI-002', 'SN654321', 'Black Diamond', 'Momentum', 'CASQUE', 'M', 'Noir', '2021-11-10', '2021-10-01', '2021-12-01', FALSE, 12),
+('EPI-003', 'SN789012', 'Beal', 'Karma', 'SANGLE', '120cm', 'Bleu', '2023-03-01', '2023-02-01', '2023-03-15', TRUE, 6),
+('EPI-004', 'SN345678', 'Petzl', 'Adjama', 'BAUDRIER', 'L', 'Jaune', '2022-05-20', '2022-04-01', '2022-06-01', FALSE, 12);
 
--- Insertion des types d'EPI (epiTypes)
-INSERT INTO epiTypes (nom) VALUES
-('Casque'),
-('Gants'),
-('Lunettes'),
-('Chaussures'),
-('Vêtements');
-
--- Insertion des contrôles EPI (epiCheck)
-INSERT INTO epiCheck (idStatus, idGestionnaire, idEPI, dateControle, remarque) VALUES
-(1, 1, 1, '2025-01-15', 'Contrôle effectué avec succès'),
-(2, 2, 2, '2025-01-16', 'Gants légèrement abîmés'),
-(1, 3, 3, '2025-01-17', 'Lunettes en bon état'),
-(3, 1, 4, '2025-01-18', 'Chaussures hors service'),
-(1, 2, 5, '2025-01-19', 'Vêtements conformes');
-
--- Insertion des EPI (EPI)
-INSERT INTO EPI (idInterne, idCheck, idTypes, marque, model, taille, couleur, numeroDeSerie, dateAchat, dateFabrication, dateMiseEnService, frequenceControle) VALUES
-(1001, 1, 1, '3M', 'Peltor', 'M', 'Jaune', 123456, '2024-05-10', '2023-04-01', '2024-05-12', 'Annuel'),      -- Fréquence Annuel
-(1002, 2, 2, 'Ansell', 'TouchNTuff', 'L', 'Noir', 123457, '2024-06-15', '2023-05-15', '2024-06-17', '6 mois'),     -- Fréquence 6 mois
-(1003, 3, 3, 'Oakley', 'Safety Glasses', 'M', 'Transparent', 123458, '2024-07-20', '2023-06-10', '2024-07-25', '3 mois'),  -- Fréquence 3 mois
-(1004, 4, 4, 'Nike', 'Air Safety', '42', 'Bleu', 123459, '2024-08-25', '2023-07-01', '2024-08-30', 'Annuel'),      -- Fréquence Annuel
-(1005, 5, 5, 'Carhartt', 'Protective Suit', 'M', 'Gris', 123460, '2024-09-10', '2023-08-15', '2024-09-15', '6 mois');  -- Fréquence 6 mois
+-- Insertion des contrôles
+INSERT INTO Controles (epiId, dateControle, status, gestionnaireId, remarques) VALUES
+(1, '2023-01-15', 'OPERATIONNEL', 1, 'Aucun problème détecté.'),
+(2, '2023-02-20', 'A_REPARER', 1, 'Casque fissuré, besoin de réparation.'),
+(3, '2023-04-01', 'OPERATIONNEL', 3, 'Sangle en bon état.'),
+(4, '2023-06-15', 'MIS_AU_REBUT', 3, 'Baudrier trop usé pour être réparé.');
