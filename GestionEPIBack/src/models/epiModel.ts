@@ -222,7 +222,46 @@ export const epiModel = {
       }
     },
   
+    getUpcomingControls: async (): Promise<EPI[]> => {
+      let connection;
+      try {
+          connection = await pool.getConnection();
+          const today = new Date();
+          const nextMonth = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 jours plus tard
+
+          const query = `
+              SELECT 
+                  id, 
+                  interneId, 
+                  numeroSerie, 
+                  marque, 
+                  modele, 
+                  type, 
+                  taille, 
+                  couleur, 
+                  dateAchat, 
+                  dateFabrication, 
+                  dateMiseEnService, 
+                  frequenceControle,
+                  DATE_ADD(
+                      dateMiseEnService, 
+                      INTERVAL (CEIL(DATEDIFF(CURDATE(), dateMiseEnService) / (30 * frequenceControle)) * frequenceControle) MONTH
+                  ) AS prochainControle
+              FROM 
+                  epi
+              WHERE 
+                  DATE_ADD(
+                      dateMiseEnService, 
+                      INTERVAL (CEIL(DATEDIFF(CURDATE(), dateMiseEnService) / (30 * frequenceControle)) * frequenceControle) MONTH
+                  ) BETWEEN ? AND ?
+          `;
+          const rows = await connection.query(query, [today, nextMonth]);
+          return rows;
+      } catch (error) {
+          throw new Error("Erreur lors de la récupération des EPIs avec des contrôles à venir.");
+      } finally {
+          if (connection) connection.release();
+      }
+  },
   
-  
-        
 }

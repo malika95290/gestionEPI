@@ -173,3 +173,13 @@ export const handlePostEPI = async (request: Request, next: NextFunction): Promi
     throw new Error("Erreur lors de l'ajout de l'EPI");
   }
 };
+
+export const handleGetUpcomingControls = async (next: NextFunction): Promise<EPI[]> => {
+  try {
+      const upcomingEPIs = await epiModel.getUpcomingControls();
+      return upcomingEPIs;
+  } catch (error) {
+      next(error);
+      throw new Error("Erreur lors de la récupération des EPIs avec des contrôles à venir.");
+  }
+};

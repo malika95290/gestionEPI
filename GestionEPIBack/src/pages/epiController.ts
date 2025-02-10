@@ -8,7 +8,8 @@ import {
   handleGetEPIsByFilters,
   handlePutEPI,
   handleDeleteEPI,
-  handlePostEPI
+  handlePostEPI,
+  handleGetUpcomingControls
 } from "../managers/epiManager";
 
 const router = express.Router();
@@ -35,7 +36,23 @@ router.get(
     }
   );
 
-  
+
+  router.get(
+    "/upcoming",
+    async (
+        request: Request,
+        response: Response<EPI[] | string>,
+        next: NextFunction
+    ) => {
+        try {
+            const upcomingEPIs = await handleGetUpcomingControls(next);
+            response.status(200).json(upcomingEPIs);
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
 // Voir tous les epis
 router.get(
   "/",

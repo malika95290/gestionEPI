@@ -20,6 +20,7 @@ export default function Login() {
     try {
       const response = await axios.post("http://localhost:5500/api/users/login", formData);
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userId", response.data.user.id); // Stocker l'ID de l'utilisateur
       navigate("/dashboard");
     } catch (err) {
       setError("Échec de la connexion. Vérifiez vos identifiants.");

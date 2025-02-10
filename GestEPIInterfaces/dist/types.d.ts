@@ -31,6 +31,7 @@ interface Cordiste extends User {
     role: UserRole.CORDISTE;
 }
 interface EPI {
+    prochainControle: string | number | Date;
     id: string;
     interneId: string;
     numeroSerie: string;

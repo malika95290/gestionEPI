@@ -41,3 +41,7 @@ Le gestionnaire peut en plus :
 
 Back 
 npm install --save-dev @types/jsonwebtoken : gestion des tokens
+
+Users test :
+CORDISTE : amrani kenza Kenza1234
+GESTIONNAIRE : louis jean Louis1234

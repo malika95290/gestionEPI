@@ -117,7 +117,7 @@ export const handlePostEpiCheck = async (request: Request, next: NextFunction): 
       dateControle: new Date(dateControle),
       remarques,
     };
-
+    console.log(controleData)
     // Ajout du contrôle d'EPI en base de données
     const newControle = await epiCheckModel.addOne(controleData);
     return newControle;
